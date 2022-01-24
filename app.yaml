@@ -1,0 +1,20 @@
+runtime: nodejs16 # or another supported version
+
+instance_class: F1
+
+handlers:
+  - url: /static/js/(.*)
+    static_files: build/static/js/\1
+    upload: build/static/js/(.*)
+  - url: /static/css/(.*)
+    static_files: build/static/css/\1
+    upload: build/static/css/(.*)
+  - url: /(.*\.(json|ico))$
+    static_files: build/\1
+    upload: build/.*\.(json|ico)$
+  - url: /
+    static_files: build/index.html
+    upload: build/index.html
+  - url: /.*
+    static_files: build/index.html
+    upload: build/index.html
