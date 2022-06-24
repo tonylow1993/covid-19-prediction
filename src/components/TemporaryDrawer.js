@@ -8,9 +8,12 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
-import SearchIcon from '@material-ui/icons/Search';
 import Settings from '@material-ui/icons/Settings';
 import CloudIcon from '@material-ui/icons/Cloud';
+import People from '@material-ui/icons/People';
+import Timeline from '@material-ui/icons/Timeline';
+import Description from '@material-ui/icons/Description';
+import Warning from '@material-ui/icons/Warning';
 import {NavLink} from 'react-router-dom';
 
 const styles = {
@@ -35,7 +38,7 @@ class TemporaryDrawer extends Component {
                     <NavLink className={"unactivePage"} activeClassName="activePage" exact to="/" style={style_unset}>
                         <ListItem button key={'Home'}>
                             <ListItemIcon><HomeIcon /></ListItemIcon>
-                            <ListItemText primary={'Home'} />
+                            <ListItemText primary={'COVID Map'} />
                         </ListItem>
                     </NavLink>
 
@@ -43,6 +46,33 @@ class TemporaryDrawer extends Component {
                 <Divider />
                 <List>
 
+                    <NavLink className={"unactivePage"}  activeClassName="activePage" exact to="/risk-level" style={style_unset}>
+                        <ListItem button key={'Warning'}>
+                            <ListItemIcon><Warning /></ListItemIcon>
+                            <ListItemText primary={'Risk Level'} />
+                        </ListItem>
+                    </NavLink>
+
+                    <NavLink className={"unactivePage"}  activeClassName="activePage" exact to="/case-details" style={style_unset}>
+                        <ListItem button key={'People'}>
+                            <ListItemIcon><People /></ListItemIcon>
+                            <ListItemText primary={'Cases'} />
+                        </ListItem>
+                    </NavLink>
+
+                    <NavLink className={"unactivePage"}  activeClassName="activePage" exact to="/demo" style={style_unset}>
+                        <ListItem button key={'Demo'}>
+                            <ListItemIcon><Timeline /></ListItemIcon>
+                            <ListItemText primary={'Demographic'} />
+                        </ListItem>
+                    </NavLink>
+
+                    <NavLink className={"unactivePage"}  activeClassName="activePage" exact to="/phsm" style={style_unset}>
+                        <ListItem button key={'Description'}>
+                            <ListItemIcon><Description /></ListItemIcon>
+                            <ListItemText primary={'Measure'} />
+                        </ListItem>
+                    </NavLink>
 
                     <NavLink className={"unactivePage"}  activeClassName="activePage" exact to="/settings" style={style_unset}>
                         <ListItem button key={'Settings'}>

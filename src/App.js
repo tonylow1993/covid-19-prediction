@@ -4,7 +4,7 @@ import './App.css';
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 
 // Material UI Imports
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
 import {CssBaseline} from "@material-ui/core";
 
 // Component Imports
@@ -13,8 +13,11 @@ import AppBar from "./components/AppBar";
 // Page Imports
 import HomePage from "./components/pages/HomePage";
 import NoPageFound from "./components/pages/NoPageFound";
-import TestPage from "./components/pages/TestPage";
+import CaseDetailsPage from "./components/pages/CaseDetailsPage";
+import RiskLevelPage from "./components/pages/RiskLevelPage";
+import PHSMPage from "./components/pages/PHSMPage";
 import SettingsPage from "./components/pages/SettingsPage";
+import DemoPage from "./components/pages/DemoPage";
 
 // Action Imports
 import {setSettings} from "./actions/settings-actions";
@@ -38,7 +41,7 @@ class App extends Component {
 
   render() {
 
-    const theme = createMuiTheme(this.props.settings);
+    const theme = createTheme(this.props.settings);
 
     return (
         <MuiThemeProvider theme={theme}>
@@ -48,6 +51,10 @@ class App extends Component {
               <Switch>
                 <Route path={"/"} exact /*strict*/ component={HomePage}/>
                 <Route path={"/settings"} exact /*strict*/ component={SettingsPage}/>
+                <Route path={"/case-details"} exact /*strict*/ component={CaseDetailsPage}/>
+                <Route path={"/demo"} exact /*strict*/ component={DemoPage}/>
+                <Route path={"/risk-level"} exact /*strict*/ component={RiskLevelPage}/>
+                <Route path={"/phsm"} exact /*strict*/ component={PHSMPage}/>
                 <Route exact /*strict*/ component={NoPageFound}/>
               </Switch>
           </Router>

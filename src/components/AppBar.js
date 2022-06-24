@@ -65,10 +65,6 @@ class AppBar extends Component {
                         <Typography variant="h6" color="inherit" className={classes.grow}>
                             <Link to={"/"} style={{all:"unset"}}>{"COVID-19 Tracking & Prediction"}</Link>
                         </Typography>
-
-                        <Typography variant="h" color="body2">
-                            {"Powered by Gotcha Studio"}
-                        </Typography>
                     </Toolbar>
                 </AppBarMUI>
                 <TemporaryDrawer

@@ -2,22 +2,23 @@ import React, {Component} from 'react';
 import {connect} from "react-redux";
 
 // Material UI Imports
-import AddIcon from '@material-ui/icons/Add';
-import RemoveIcon from '@material-ui/icons/Remove';
-import Fab from '@material-ui/core/Fab';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
 import * as d3 from "d3";
 import * as topojson from "topojson-client";
 // Action Imports
 import {setTest} from "../../actions/home-actions";
 import './tooltip-d3-js-map.css';
+import ColorScaleBar from './ColorScaleBar'
+import Status from './Status'
 
 class HomePage extends Component {
-    createMap()
-    {
+    constructor(props) {
+        super(props);
+        this.state = {
+            prediction: []
+        }
+    }
+
+    createMap() {
         const margin = {
             top: 10,
             left: 10,
@@ -28,7 +29,7 @@ class HomePage extends Component {
         width = width - margin.left - margin.right;
         let mapRatio = .5;
         let height = width * mapRatio;
-        let mapRatioAdjuster = 40;
+        let mapRatioAdjuster = 50;
         let hongKongCenter = [114.15, 22.33];
         let projection = d3.geo.mercator().center(hongKongCenter).translate([width / 2, height / 2]).scale(width * [mapRatio + mapRatioAdjuster]);
         let zoom = d3.behavior.zoom().translate([0, 0]).scale(1).scaleExtent([1, 20]).on("zoom", () => { features.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")") });
@@ -51,7 +52,17 @@ class HomePage extends Component {
             features.selectAll("path")
                 .data(topojson.feature(e, e.objects.HKG_adm1_1).features).enter()
                 .append("path").attr("d", path)
-                .attr("fill", "#e8d8c3")
+                .attr("fill", t => {
+                    const name = t.properties.NAME_1.replaceAll(" ", "_").replaceAll("_and_", "_")
+                    
+                    for (var key in this.state.prediction) {
+                        if (this.state.prediction.hasOwnProperty(key) && key.includes(name)) {
+                            console.log(this.state.prediction[key].toFixed(2));
+                            return this.fillColor(this.state.prediction[key])
+                        }
+                    }
+                    return "#DEEDCF";
+                })
                 .attr("stroke", "#404040")
                 .attr("stroke-width", .2)
                 .on("mousemove", t => {
@@ -67,10 +78,10 @@ class HomePage extends Component {
                         .text(t.properties.NAME_1);
                     
                     const name = t.properties.NAME_1.replaceAll(" ", "_").replaceAll("_and_", "_")
-                    for (var key in this.state) {
-                        if (this.state.hasOwnProperty(key) && key.includes(name)) {
+                    for (var key in this.state.prediction) {
+                        if (this.state.prediction.hasOwnProperty(key) && key.includes(name)) {
                             d3.select("#tooltip").select("#region-prediction-tooltip")
-                                .text(this.state[key]);
+                                .text(this.state.prediction[key].toFixed(2));
                         }
                     }
 
@@ -85,14 +96,22 @@ class HomePage extends Component {
         });
     }
 
-    getPrediction()
-    {
+    fillColor(prediction) {
+        if (prediction === 0) return "#deedcf";
+        else if (prediction > 0 && prediction < 20) return "#56B870"
+        else if (prediction > 20 && prediction < 50) return "#1D9A6C"
+        else if (prediction >= 50 && prediction < 100) return "#137177"
+        else if (prediction >= 100) return "#0A2F51"
+        else return "#DEEDCF";
+    }
+
+    getPrediction() {
         fetch("https://asia-east2-covid-19-prediction-in-hk.cloudfunctions.net/get-hk-covid-19-prediction")
         .then(res => res.json())
         .then(
-            (result) => {
-                this.setState(result[0])
-                console.log(result);
+            (results) => {
+                this.setState({'prediction': results.find(result => result.Date.value === '2022-02-01')})
+                this.createMap();
             },
             (error) => {
                 console.error(error);
@@ -100,19 +119,19 @@ class HomePage extends Component {
         )
     }
 
-    componentDidMount()
-    {
+    componentDidMount() {
         this.getPrediction();
-        this.createMap();
     }
 
     render() {
         return (
             <div>
+                <ColorScaleBar/>
+                <Status/>
                 <div id="tooltip" className="hidden">
-                    <div><strong>Region:</strong> <span id="region-name-tooltip">100</span></div>
-                    <div><strong>Type:</strong> <span id="region-type-tooltip">200</span></div>
-                    <div><strong>Prediction:</strong> <span id="region-prediction-tooltip">300</span></div>
+                    <div><strong>Region:</strong> <span id="region-name-tooltip"></span></div>
+                    <div><strong>Type:</strong> <span id="region-type-tooltip"></span></div>
+                    <div><strong>Predicted next 14 day cases:</strong> <span id="region-prediction-tooltip"></span></div>
                 </div>
                 <div id="viz"/>
             </div>
