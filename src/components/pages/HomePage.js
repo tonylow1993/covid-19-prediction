@@ -97,12 +97,12 @@ class HomePage extends Component {
     }
 
     fillColor(prediction) {
-        if (prediction === 0) return "#deedcf";
-        else if (prediction > 0 && prediction < 20) return "#56B870"
-        else if (prediction > 20 && prediction < 50) return "#1D9A6C"
-        else if (prediction >= 50 && prediction < 100) return "#137177"
-        else if (prediction >= 100) return "#0A2F51"
-        else return "#DEEDCF";
+        if (prediction === 0) return "#ffffcc";
+        else if (prediction > 0 && prediction < 20) return "#fed976"
+        else if (prediction > 20 && prediction < 50) return "#fd8d3c"
+        else if (prediction >= 50 && prediction < 100) return "#e31a1c"
+        else if (prediction >= 100) return "#800026"
+        else return "#ffffcc";
     }
 
     getPrediction() {

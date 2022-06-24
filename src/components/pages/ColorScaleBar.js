@@ -24,15 +24,15 @@ const ColorScaleBar = () => { // Stateless Component
                     {"High risk"}
                 </Typography>
                 <div>
-                    <div className='bar-item' style={{background: '#0A2F51'}}/>
-                    <div className='bar-item' style={{background: '#0E4D64'}}/>
-                    <div className='bar-item' style={{background: '#137177'}}/>
-                    <div className='bar-item' style={{background: '#188977'}}/>
-                    <div className='bar-item' style={{background: '#1D9A6C'}}/>
-                    <div className='bar-item' style={{background: '#39A96B'}}/>
-                    <div className='bar-item' style={{background: '#56B870'}}/>
-                    <div className='bar-item' style={{background: '#99D492'}}/>
-                    <div className='bar-item' style={{background: '#DEEDCF'}}/>
+                    <div className='bar-item' style={{background: '#800026'}}/>
+                    <div className='bar-item' style={{background: '#bd0026'}}/>
+                    <div className='bar-item' style={{background: '#e31a1c'}}/>
+                    <div className='bar-item' style={{background: '#fc4e2a'}}/>
+                    <div className='bar-item' style={{background: '#fd8d3c'}}/>
+                    <div className='bar-item' style={{background: '#feb24c'}}/>
+                    <div className='bar-item' style={{background: '#fed976'}}/>
+                    <div className='bar-item' style={{background: '#ffeda0'}}/>
+                    <div className='bar-item' style={{background: '#ffffcc'}}/>
                 </div>
                 <Typography className='text' variant="body2" color="body2">
                     {"Low risk"}
