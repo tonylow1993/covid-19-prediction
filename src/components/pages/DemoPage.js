@@ -2,12 +2,6 @@ import React, {Component} from 'react';
 // Material UI Imports
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import {
@@ -29,6 +23,14 @@ class DemoPage extends Component {
         super(props);
         this.state = {
             cases: [],
+            prediction: [],
+            vaccination: [],
+            stats: [],
+            worldStats: [],
+            confirm14: 0,
+            death14: 0,
+            cumulativeConfirm: 0,
+            rt: [],
             loading: true
         }
         ChartJS.register(
@@ -42,15 +44,19 @@ class DemoPage extends Component {
             PointElement,
             LineElement,
           );
-        this.getCaseDetails();
+        this.getVaccination();
+        this.getStats();
+        this.getWorldStats();
+        this.getRt();
+        this.getPrediction();
     }
 
-    getCaseDetails() {
-        fetch("https://asia-east2-covid-19-prediction-in-hk.cloudfunctions.net/get-hk-covid-19-case-details?date=2022-02-01")
+    getStats() {
+        fetch("https://asia-east2-covid-19-prediction-in-hk.cloudfunctions.net/get-hk-covid-19-stats")
         .then(res => res.json())
         .then(
             (result) => {
-                this.setState({'cases': result.sort((a, b) => b.Case_no_ - a.Case_no_)})
+                this.setState({'stats': result.sort((a, b) => new Date(a.As_of_date.value) - new Date(b.As_of_date.value))})
                 this.setState({'loading': false})
             },
             (error) => {
@@ -58,6 +64,79 @@ class DemoPage extends Component {
                 console.error(error);
             }
         )
+    }
+
+    getWorldStats() {
+      fetch("https://asia-east2-covid-19-prediction-in-hk.cloudfunctions.net/get-hk-covid-19-world-stats ")
+      .then(res => res.json())
+      .then(
+          (result) => {
+              this.setState({'worldStats': result})
+              this.setState({'confirm14': result[0].Number_of_newly_confirmed_cases_reported_in_the_past_14_days})
+              this.setState({'death14': result[0].Cumulative_number_of_deaths_among_confirmed_cases - result[13].Cumulative_number_of_deaths_among_confirmed_cases})
+              this.setState({'cumulativeConfirm': result[0].Cumulative_number_of_confirmed_cases})
+              this.setState({'loading': false})
+          },
+          (error) => {
+              this.setState({'loading': false})
+              console.error(error);
+          }
+      )
+  }
+
+    getVaccination() {
+      fetch("https://asia-east2-covid-19-prediction-in-hk.cloudfunctions.net/get-hk-covid-19-vaccination")
+        .then(res => res.json())
+        .then(
+          (result) => {
+              this.setState({'vaccination': result.sort((a, b) => new Date(a.date.value) - new Date(b.date.value))})
+              this.setState({'loading': false})
+          },
+          (error) => {
+              this.setState({'loading': false})
+              console.error(error);
+          }
+        )
+    }
+
+    getRt() {
+      fetch("https://asia-east2-covid-19-prediction-in-hk.cloudfunctions.net/get-hk-covid-19-Rt")
+        .then(res => res.json())
+        .then(
+          (result) => {
+              this.setState({'rt': result.filter(rt => rt.Rt !== 'null').sort((a, b) => new Date(a.Date.value) - new Date(b.Date.value))})
+              this.setState({'loading': false})
+          },
+          (error) => {
+              this.setState({'loading': false})
+              console.error(error);
+          }
+        )
+    }
+
+    getPrediction() {
+      fetch("https://asia-east2-covid-19-prediction-in-hk.cloudfunctions.net/get-hk-covid-19-prediction")
+        .then(res => res.json())
+        .then(
+          (result) => {
+              const prediction = result.map(r => ({
+                Date: r.Date,
+                Confirmed_case_next14_lr: r.Confirmed_case_next14_lr.toFixed(0),
+                Confirmed_case_next14_dnnr: r.Confirmed_case_next14_dnnr.toFixed(0),
+                Confirmed_case_next14_btr: r.Confirmed_case_next14_btr.toFixed(0),
+              }))
+              this.setState({'prediction': prediction.sort((a, b) => new Date(a.Date.value) - new Date(b.Date.value)).slice(0, 30)})
+              this.setState({'loading': false})
+          },
+          (error) => {
+              this.setState({'loading': false})
+              console.error(error);
+          }
+        )
+    }
+
+    numberWithCommas(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     render() {
@@ -68,39 +147,23 @@ class DemoPage extends Component {
             backgroundColor: 'transparent'
         }
 
-        const pieData = {
-            labels: ['Male', 'Female'],
-            datasets: [
-              {
-                label: 'Gender',
-                data: [this.state.cases.filter(c => c.Gender === 'M').length, this.state.cases.filter(c => c.Gender === 'F').length],
-                backgroundColor: [
-                  'rgba(54, 162, 235, 0.2)',
-                  'rgba(255, 99, 132, 0.2)',
-                ],
-                borderColor: [
-                  'rgba(54, 162, 235, 1)',
-                  'rgba(255, 99, 132, 1)',
-                ],
-                borderWidth: 1,
+        const lineOptionVaccination = {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Vaccinations in Past 30 Days',
+              font: {
+                size: 20
               }
-            ]
-        }
-
-        const options1 = {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'top',
-            },
-            title: {
-              display: true,
-              text: 'Gender & Age Group Distribution',
             },
           },
         };
 
-        const options2 = {
+        const lineOptionCase = {
           responsive: true,
           plugins: {
             legend: {
@@ -108,12 +171,15 @@ class DemoPage extends Component {
             },
             title: {
               display: true,
-              text: 'Gender Distribution',
+              text: 'Cumulative Positive Cases in Past 30 Days',
+              font: {
+                size: 20
+              }
             },
           },
         };
 
-        const options3 = {
+        const lineOptionRt = {
           responsive: true,
           plugins: {
             legend: {
@@ -121,88 +187,111 @@ class DemoPage extends Component {
             },
             title: {
               display: true,
-              text: 'Import vs Local Case Trend',
+              text: 'Effective Production Number (Rt) in Past 30 Days',
+              font: {
+                size: 20
+              }
+            },
+          },
+        };
+
+        const lineOptionPrediction = {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Predicted vs Actual Confirmed Cases in Next 14 Days',
+              font: {
+                size: 20
+              }
             },
           },
         };
         
-        const barData = {
-          labels: ['< 20', '20 - 30', '30 - 40', '40 - 50', '50 - 60', '> 60'],
+        const lineDataVaccination = {
+          labels: this.state.vaccination.map(v => v.date.value),
           datasets: [
+            /*{
+              label: 'Total Vaccinations',
+              data: this.state.vaccination.map(v => v.total_vaccinations),
+              borderColor: 'rgb(255, 99, 132)',
+              backgroundColor: 'rgba(255, 99, 132)',
+            },*/
             {
-              label: 'Male',
-              data: [
-                this.state.cases.filter(c => c.Gender === 'M' && c.Age < 20).length, 
-                this.state.cases.filter(c => c.Gender === 'M' && c.Age >= 20 && c.Age < 30).length, 
-                this.state.cases.filter(c => c.Gender === 'M' && c.Age >= 30 && c.Age < 40).length, 
-                this.state.cases.filter(c => c.Gender === 'M' && c.Age >= 40 && c.Age < 50).length, 
-                this.state.cases.filter(c => c.Gender === 'M' && c.Age >= 50 && c.Age < 60).length, 
-                this.state.cases.filter(c => c.Gender === 'M' && c.Age > 60).length
-              ],
-              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+              label: 'Population Vaccinated',
+              data: this.state.vaccination.map(v => v.people_vaccinated),
+              borderColor: 'rgb(53, 162, 235)',
+              backgroundColor: 'rgba(53, 162, 235)',
             },
             {
-              label: 'Female',
-              data: [
-                this.state.cases.filter(c => c.Gender === 'F' && c.Age < 20).length, 
-                this.state.cases.filter(c => c.Gender === 'F' && c.Age >= 20 && c.Age < 30).length, 
-                this.state.cases.filter(c => c.Gender === 'F' && c.Age >= 30 && c.Age < 40).length, 
-                this.state.cases.filter(c => c.Gender === 'F' && c.Age >= 40 && c.Age < 50).length, 
-                this.state.cases.filter(c => c.Gender === 'F' && c.Age >= 50 && c.Age < 60).length, 
-                this.state.cases.filter(c => c.Gender === 'F' && c.Age > 60).length
-              ],
-              backgroundColor: 'rgba(53, 162, 235, 0.5)',
+              label: 'Population with Booster',
+              data: this.state.vaccination.map(v => v.total_boosters),
+              borderColor: 'rgb(35, 161, 53)',
+              backgroundColor: 'rgb(35, 161, 53)',
             },
           ],
         };
 
-        const lineData = {
-          labels: ['18/1', '19/1', '20/1', '21/1', '22/1', '23/1', '24/1', '25/1', '26/1', '27/1', '28/1', '29/1', '30/1', '31/1', '1/2'],
+        const lineDataCase = {
+          labels: this.state.stats.map(v => v.As_of_date.value),
           datasets: [
             {
-              label: 'Import Case',
-              data: [
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-18' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-19' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-20' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-21' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-22' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-23' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-24' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-25' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-26' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-27' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-28' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-29' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-30' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-31' && c.Classification_.toLowerCase().includes('import')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-02-01' && c.Classification_.toLowerCase().includes('import')).length,
-              ],
+              label: 'Nucleic Acid Test',
+              data: this.state.stats.map(v => v.Number_of_positive_case_NC),
               borderColor: 'rgb(255, 99, 132)',
-              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+              backgroundColor: 'rgba(255, 99, 132)',
             },
             {
-              label: 'Local case',
-              data: [
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-18' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-19' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-20' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-21' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-22' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-23' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-24' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-25' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-26' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-27' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-28' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-29' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-30' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-01-31' && c.Classification_.toLowerCase().includes('local')).length,
-                this.state.cases.filter(c => c.Report_date.value === '2022-02-01' && c.Classification_.toLowerCase().includes('local')).length,
-              ],
+              label: 'Rapid Antigen Test',
+              data: this.state.stats.map(v => v.Number_of_positive_case_RAT),
               borderColor: 'rgb(53, 162, 235)',
-              backgroundColor: 'rgba(53, 162, 235, 0.5)',
+              backgroundColor: 'rgba(53, 162, 235)',
             },
+          ],
+        };
+
+        const lineDataRt = {
+          labels: this.state.rt.map(v => v.Date.value),
+          datasets: [
+            {
+              label: 'Effective Reproduction Number (Rt)',
+              data: this.state.rt.map(v => v.Rt),
+              borderColor: 'rgb(255, 99, 132)',
+              backgroundColor: 'rgba(255, 99, 132)',
+            },
+          ],
+        };
+
+        const lineDataPrediction = {
+          labels: this.state.prediction.map(p => p.Date.value),
+          datasets: [
+            {
+              label: 'Predicted Confirmed Cases (LR)',
+              data: this.state.prediction.map(p => p.Confirmed_case_next14_lr),
+              borderColor: 'rgb(255, 255, 0)',
+              backgroundColor: 'rgba(255, 255, 0)',
+            },
+            {
+              label: 'Predicted Confirmed Cases (DNNR)',
+              data: this.state.prediction.map(p => p.Confirmed_case_next14_dnnr),
+              borderColor: 'rgb(0, 0, 255)',
+              backgroundColor: 'rgba(0, 0, 255)',
+            },
+            {
+              label: 'Predicted Confirmed Cases (XGBoost)',
+              data: this.state.prediction.map(p => p.Confirmed_case_next14_btr),
+              borderColor: 'rgb(0, 255, 255)',
+              backgroundColor: 'rgba(0, 255, 255)',
+            },
+            {
+              label: 'Actual Confirmed Cases',
+              data: this.state.worldStats.slice(5, 35).sort((a, b) => new Date(a.As_of_date.value) - new Date(b.As_of_date.value)).map(p => p.Number_of_newly_confirmed_cases_reported_in_the_past_14_days),
+              borderColor: 'rgb(0, 0, 0)',
+              backgroundColor: 'rgba(0, 0, 0)',
+            }
           ],
         };
         
@@ -210,20 +299,57 @@ class DemoPage extends Component {
             this.state.loading ? 
             <CircularProgress style={progressStyle}/> 
             : 
-            <Grid container spacing={4}>
-              <Grid item xs={8}>
+            <Grid container>
+              <Grid item xs={4}>
                 <Paper className='paper'>
-                  <Bar options={options1} data={barData} />
+                  <Typography variant="body1" style={{padding:"10px", fontWeight: "bold"}}>
+                      {"Confirmed Case in Past 14 Days"}
+                  </Typography>
+                  <Typography variant="body2" style={{padding:"10px"}}>
+                      {this.numberWithCommas(this.state.confirm14)}
+                      <i className="arrow up"></i>
+                  </Typography>
                 </Paper>
               </Grid>
               <Grid item xs={4}>
                 <Paper className='paper'>
-                  <Pie options={options2} data={pieData} />
+                  <Typography variant="body1" style={{padding:"10px", fontWeight: "bold"}}>
+                      {"Death Case in Past 14 Days"}
+                  </Typography>
+                  <Typography variant="body2" style={{padding:"10px"}}>
+                    {this.numberWithCommas(this.state.death14)}
+                    <i className="arrow up"></i>
+                  </Typography>
                 </Paper>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={4}>
                 <Paper className='paper'>
-                  <Line options={options3} data={lineData} />
+                  <Typography variant="body1" style={{padding:"10px", fontWeight: "bold"}}>
+                      {"Cumulative Number of Confirmed Cases"}
+                  </Typography>
+                  <Typography variant="body2" style={{padding:"10px"}}>
+                      {this.numberWithCommas(this.state.cumulativeConfirm)}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={6}>
+                <Paper className='paper'>
+                  <Line options={lineOptionPrediction} data={lineDataPrediction} />
+                </Paper>
+              </Grid>
+              <Grid item xs={6}>
+                <Paper className='paper'>
+                  <Line options={lineOptionVaccination} data={lineDataVaccination} />
+                </Paper>
+              </Grid>
+              <Grid item xs={6}>
+                <Paper className='paper'>
+                  <Line options={lineOptionCase} data={lineDataCase} />
+                </Paper>
+              </Grid>
+              <Grid item xs={6}>
+                <Paper className='paper'>
+                  <Line options={lineOptionRt} data={lineDataRt} />
                 </Paper>
               </Grid>
             </Grid>

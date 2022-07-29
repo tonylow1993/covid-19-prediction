@@ -38,13 +38,20 @@ class TemporaryDrawer extends Component {
                     <NavLink className={"unactivePage"} activeClassName="activePage" exact to="/" style={style_unset}>
                         <ListItem button key={'Home'}>
                             <ListItemIcon><HomeIcon /></ListItemIcon>
-                            <ListItemText primary={'COVID Map'} />
+                            <ListItemText primary={'COVID Heat Map'} />
                         </ListItem>
                     </NavLink>
 
                 </List>
                 <Divider />
                 <List>
+
+                    <NavLink className={"unactivePage"}  activeClassName="activePage" exact to="/demo" style={style_unset}>
+                        <ListItem button key={'Demo'}>
+                            <ListItemIcon><Timeline /></ListItemIcon>
+                            <ListItemText primary={'Dashboard'} />
+                        </ListItem>
+                    </NavLink>
 
                     <NavLink className={"unactivePage"}  activeClassName="activePage" exact to="/risk-level" style={style_unset}>
                         <ListItem button key={'Warning'}>
@@ -57,13 +64,6 @@ class TemporaryDrawer extends Component {
                         <ListItem button key={'People'}>
                             <ListItemIcon><People /></ListItemIcon>
                             <ListItemText primary={'Cases'} />
-                        </ListItem>
-                    </NavLink>
-
-                    <NavLink className={"unactivePage"}  activeClassName="activePage" exact to="/demo" style={style_unset}>
-                        <ListItem button key={'Demo'}>
-                            <ListItemIcon><Timeline /></ListItemIcon>
-                            <ListItemText primary={'Demographic'} />
                         </ListItem>
                     </NavLink>
 

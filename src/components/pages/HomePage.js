@@ -14,7 +14,8 @@ class HomePage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            prediction: []
+            prediction: [],
+            date: ''
         }
     }
 
@@ -98,10 +99,14 @@ class HomePage extends Component {
 
     fillColor(prediction) {
         if (prediction === 0) return "#ffffcc";
-        else if (prediction > 0 && prediction < 20) return "#fed976"
-        else if (prediction > 20 && prediction < 50) return "#fd8d3c"
-        else if (prediction >= 50 && prediction < 100) return "#e31a1c"
-        else if (prediction >= 100) return "#800026"
+        else if (prediction > 0 && prediction < 500) return "#ffeda0"
+        else if (prediction >= 500 && prediction < 1000) return "#fed976"
+        else if (prediction >= 1000 && prediction < 1500) return "#feb24c"
+        else if (prediction >= 1500 && prediction < 2000) return "#fd8d3c"
+        else if (prediction >= 2000 && prediction < 3000) return "#fc4e2a"
+        else if (prediction >= 3000 && prediction < 5000) return "#e31a1c"
+        else if (prediction >= 5000 && prediction < 7500) return "#bd0026"
+        else if (prediction >= 7500) return "#800026"
         else return "#ffffcc";
     }
 
@@ -110,7 +115,9 @@ class HomePage extends Component {
         .then(res => res.json())
         .then(
             (results) => {
-                this.setState({'prediction': results.find(result => result.Date.value === '2022-02-01')})
+                const result = results.sort((a, b) => new Date(b.Date.value) - new Date(a.Date.value))[0]
+                this.setState({'prediction': result})
+                this.setState({'date': result.Date.value})
                 this.createMap();
             },
             (error) => {
@@ -127,10 +134,9 @@ class HomePage extends Component {
         return (
             <div>
                 <ColorScaleBar/>
-                <Status/>
+                <Status lastUpdateDate={this.state.date}/>
                 <div id="tooltip" className="hidden">
                     <div><strong>Region:</strong> <span id="region-name-tooltip"></span></div>
-                    <div><strong>Type:</strong> <span id="region-type-tooltip"></span></div>
                     <div><strong>Predicted next 14 day cases:</strong> <span id="region-prediction-tooltip"></span></div>
                 </div>
                 <div id="viz"/>

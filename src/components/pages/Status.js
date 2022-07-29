@@ -3,7 +3,7 @@ import React from 'react';
 // Material UI Imports
 import Typography from '@material-ui/core/Typography';
 
-const Status = () => { // Stateless Component
+const Status = ({lastUpdateDate}) => { // Stateless Component
         const widgetStyle = {
             position: 'absolute',
             bottom: '0%',
@@ -20,7 +20,7 @@ const Status = () => { // Stateless Component
         return (
             <div style={widgetStyle}>
                 <Typography className='text' variant="body2" color="body2">
-                    {"Latest Update: 01 Feb 2022"}
+                    {`Latest Update: ${lastUpdateDate}`}
                 </Typography>
             </div>
         );

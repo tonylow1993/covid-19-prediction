@@ -63,7 +63,7 @@ class AppBar extends Component {
                         </IconButton>
 
                         <Typography variant="h6" color="inherit" className={classes.grow}>
-                            <Link to={"/"} style={{all:"unset"}}>{"COVID-19 Tracking & Prediction"}</Link>
+                            <Link to={"/"} style={{all:"unset"}}>{"COVID-19 Tracking & Prediction System"}</Link>
                         </Typography>
                     </Toolbar>
                 </AppBarMUI>

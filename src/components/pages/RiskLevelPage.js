@@ -10,25 +10,41 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Checkbox from "@material-ui/core/Checkbox";
+import InputLabel from "@material-ui/core/InputLabel";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import { MenuProps, useStyles, options } from "../utils";
 
 class RiskLevelPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
             prediction: [],
-            loading: true
+            loading: true,
+            selected: ["Deep Neural Network"],
         }
         this.getPrediction();
     }
 
+    groupBy(xs, key) {
+        return xs.reduce(function(rv, x) {
+            (rv[x[key]] = rv[x[key]] || []).push(x);
+            return rv;
+        }, {});
+    };
+
     getRiskLevel(predictedNo) {
-        if (predictedNo > 100) {
+        if (predictedNo > 5000) {
             return 'Very high'
-        } else if (predictedNo >= 50 && predictedNo < 100) {
+        } else if (predictedNo >= 2500 && predictedNo < 5000) {
             return 'High'
-        } else if (predictedNo >= 20 && predictedNo < 50) {
+        } else if (predictedNo >= 1000 && predictedNo < 2500) {
             return 'Moderate'
-        } else if (predictedNo < 20) {
+        } else if (predictedNo < 1000) {
             return 'Low'
         }
         return 'N/A'
@@ -39,17 +55,28 @@ class RiskLevelPage extends Component {
         .then(res => res.json())
         .then(
             (results) => {
-                const result = results.find(result => result.Date.value === '2022-02-01')
-                const prediction = Object.keys(result).filter(key => key.startsWith('Res')).sort((a, b) => {
-                    return result[b] - result[a] 
-                }).map((key, index) => ({
-                    rank: index + 1,
-                    district: key.replace('Res_', '').replace('_next14', '').replaceAll('_', ' '),
+                const result = results.sort((a, b) => new Date(b.Date.value) - new Date(a.Date.value))[0]
+                const prediction = Object
+                .keys(result)
+                .filter(r => !r.includes('Measure') && !r.includes('Date') && !r.includes('Confirmed'))
+                .map((key, index) => ({
+                    district: key.replace('_next14', '').replace('_lr', '').replace('_btr', '').replace('_dnnr', '').replaceAll('_', ' '),
+                    type: key.includes('lr') ? 'lr' : key.includes('dnnr') ? 'dnnr' : 'btr',
                     number: result[key],
-                    riskLevel: this.getRiskLevel(result[key])
                 }));
-                console.log(prediction)
-                this.setState({'prediction': prediction, 'loading': false})
+                const grouped = this.groupBy(prediction, 'district')
+                const allPrediction = Object
+                .keys(grouped)
+                .map(key => ({
+                    district: key,
+                    lr: grouped[key][0].number,
+                    dnnr: grouped[key][1].number,
+                    btr: grouped[key][2].number,
+                    number: grouped[key][1].number,
+                }))
+                .sort((a, b) => b.number - a.number)
+                .map((p, i) => ({...p, rank: i + 1,riskLevel: this.getRiskLevel(p.number)}))
+                this.setState({'prediction': allPrediction, 'loading': false})
             },
             (error) => {
                 console.error(error);
@@ -75,17 +102,81 @@ class RiskLevelPage extends Component {
             backgroundColor: 'transparent'
         }
 
+        const handleChange = (event) => {
+            let value = event.target.value;
+            if (value[value.length - 1] === "all") {
+                this.setState({'selected': this.state.selected.length === options.length ? [] : options});
+                value = options
+            } else {
+                this.setState({'selected': value});
+            }
+            const prediction = this.state.prediction
+            this.setState({'prediction': prediction
+                .map(p => ({
+                    ...p, 
+                    number: ((value.includes("Linear Regression") ? p.lr : 0) + (value.includes("Deep Neural Network") ? p.dnnr : 0) + (value.includes("XGBoost") ? p.btr : 0)) / value.length
+                }))
+                .sort((a, b) => b.number - a.number)
+                .map((p, i) => ({...p, rank: i + 1,riskLevel: this.getRiskLevel(p.number)}))
+            });
+        };
+
+        const classes = useStyles;
+        const isAllSelected = options.length > 0 && this.state.selected.length === options.length;
+
         return (
             this.state.loading ? 
             <CircularProgress style={progressStyle}/> :
             <div style={divStyle}>
+                <FormControl className={classes.formControl} style={{width:"350px", marginBottom:"20px"}}>
+                    <InputLabel id="mutiple-select-label">Select Model</InputLabel>
+                    <Select
+                        labelId="mutiple-select-label"
+                        multiple
+                        value={this.state.selected}
+                        onChange={handleChange}
+                        renderValue={(selected) => selected.join(", ")}
+                        MenuProps={MenuProps}
+                    >
+                        <MenuItem
+                        value="all"
+                        classes={{
+                            root: isAllSelected ? classes.selectedAll : ""
+                        }}
+                        >
+                        <ListItemIcon>
+                            <Checkbox
+                            classes={{ indeterminate: classes.indeterminateColor }}
+                            checked={isAllSelected}
+                            indeterminate={
+                                this.state.selected.length > 0 && this.state.selected.length < options.length
+                            }
+                            />
+                        </ListItemIcon>
+                        <ListItemText
+                            classes={{ primary: classes.selectAllText }}
+                            primary="Select All"
+                        />
+                        </MenuItem>
+                        {options.map((option) => (
+                        <MenuItem key={option} value={option}>
+                            <ListItemIcon>
+                            <Checkbox checked={this.state.selected.indexOf(option) > -1} />
+                            </ListItemIcon>
+                            <ListItemText primary={option} />
+                        </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
                 <TableContainer style={tableStyle} component={Paper}>
                     <Table sx={{ minWidth: 650 }} aria-label="case-details">
                         <TableHead>
                         <TableRow>
                             <TableCell>Rank</TableCell>
                             <TableCell align="right">District</TableCell>
-                            <TableCell align="right">Predicted number of cases in next 14 days</TableCell>
+                            {this.state.selected.includes("Linear Regression") && <TableCell align="right">Prediction (LR)</TableCell>}
+                            {this.state.selected.includes("Deep Neural Network") && <TableCell align="right">Prediction (DNN)</TableCell>}
+                            {this.state.selected.includes("XGBoost") && <TableCell align="right">Prediction (XGBoost)</TableCell>}
                             <TableCell align="right">Risk Level</TableCell>
                         </TableRow>
                         </TableHead>
@@ -99,7 +190,9 @@ class RiskLevelPage extends Component {
                                 {row.rank}
                             </TableCell>
                             <TableCell align="right">{row.district}</TableCell>
-                            <TableCell align="right">{row.number.toFixed(2)}</TableCell>
+                            {this.state.selected.includes("Linear Regression") && <TableCell align="right">{row.lr.toFixed(2)}</TableCell>}
+                            {this.state.selected.includes("Deep Neural Network") && <TableCell align="right">{row.dnnr.toFixed(2)}</TableCell>}
+                            {this.state.selected.includes("XGBoost") && <TableCell align="right">{row.btr.toFixed(2)}</TableCell>}
                             <TableCell align="right">{row.riskLevel}</TableCell>
                             </TableRow>
                         ))}
