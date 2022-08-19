@@ -137,7 +137,7 @@ class HomePage extends Component {
                 <Status lastUpdateDate={this.state.date}/>
                 <div id="tooltip" className="hidden">
                     <div><strong>Region:</strong> <span id="region-name-tooltip"></span></div>
-                    <div><strong>Predicted next 14 day cases:</strong> <span id="region-prediction-tooltip"></span></div>
+                    <div><strong>Predicted next 14 day activities by confirmed case:</strong> <span id="region-prediction-tooltip"></span></div>
                 </div>
                 <div id="viz"/>
             </div>

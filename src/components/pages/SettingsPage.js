@@ -7,7 +7,6 @@ import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import Slider from '@material-ui/lab/Slider';
 import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
@@ -28,24 +27,9 @@ const styles = theme => ({
     chip: {
         margin: theme.spacing.unit,
     },
-    slider: {
-        padding: '22px 0px',
-    },
 });
 
 class SettingsPage extends Component {
-
-    handleSliderChange = (event, value) => {
-        // redux
-        this.props.setSettings({...this.props.settings,typography:{...this.props.settings.typography,fontSize:value}});
-        // local-storage
-        let settings = getLocalSettings();
-        if (settings!==null && settings!==undefined) {
-            settings.typography.fontSize=value;
-            setLocalSettings(settings);
-        }
-    };
-
     handleDarkModeToggle = () =>{
         // redux
         if (this.props.settings.palette.type==='dark')
@@ -151,17 +135,6 @@ class SettingsPage extends Component {
                             {"Font Size"}
                         </Typography>
                         <Divider />
-                        <div style={{width:"300px",margin:"auto"}}>
-                            <Slider
-                                classes={{ container: classes.slider }}
-                                value={this.props.settings.typography.fontSize}
-                                aria-labelledby="label"
-                                onChange={this.handleSliderChange}
-                                min={10}
-                                max={24}
-                                step={0.5}
-                            />
-                        </div>
                         </div>
                     </Paper>
             </div>

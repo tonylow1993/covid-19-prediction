@@ -265,6 +265,7 @@ class DemoPage extends Component {
           ],
         };
 
+        const index = this.state.worldStats.findIndex(stat => stat.As_of_date.value === '2022-07-22')
         const lineDataPrediction = {
           labels: this.state.prediction.map(p => p.Date.value),
           datasets: [
@@ -288,7 +289,7 @@ class DemoPage extends Component {
             },
             {
               label: 'Actual Confirmed Cases',
-              data: this.state.worldStats.slice(5, 35).sort((a, b) => new Date(a.As_of_date.value) - new Date(b.As_of_date.value)).map(p => p.Number_of_newly_confirmed_cases_reported_in_the_past_14_days),
+              data: this.state.worldStats.slice(index, index + 30).sort((a, b) => new Date(a.As_of_date.value) - new Date(b.As_of_date.value)).map(p => p.Number_of_newly_confirmed_cases_reported_in_the_past_14_days),
               borderColor: 'rgb(0, 0, 0)',
               backgroundColor: 'rgba(0, 0, 0)',
             }

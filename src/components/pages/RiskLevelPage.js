@@ -175,7 +175,7 @@ class RiskLevelPage extends Component {
                             <TableCell>Rank</TableCell>
                             <TableCell align="right">District</TableCell>
                             {this.state.selected.includes("Linear Regression") && <TableCell align="right">Prediction (LR)</TableCell>}
-                            {this.state.selected.includes("Deep Neural Network") && <TableCell align="right">Prediction (DNN)</TableCell>}
+                            {this.state.selected.includes("Deep Neural Network") && <TableCell align="right"><b>Prediction (DNN)</b></TableCell>}
                             {this.state.selected.includes("XGBoost") && <TableCell align="right">Prediction (XGBoost)</TableCell>}
                             <TableCell align="right">Risk Level</TableCell>
                         </TableRow>
@@ -191,7 +191,7 @@ class RiskLevelPage extends Component {
                             </TableCell>
                             <TableCell align="right">{row.district}</TableCell>
                             {this.state.selected.includes("Linear Regression") && <TableCell align="right">{row.lr.toFixed(2)}</TableCell>}
-                            {this.state.selected.includes("Deep Neural Network") && <TableCell align="right">{row.dnnr.toFixed(2)}</TableCell>}
+                            {this.state.selected.includes("Deep Neural Network") && <TableCell align="right"><b>{row.dnnr.toFixed(2)}</b></TableCell>}
                             {this.state.selected.includes("XGBoost") && <TableCell align="right">{row.btr.toFixed(2)}</TableCell>}
                             <TableCell align="right">{row.riskLevel}</TableCell>
                             </TableRow>
