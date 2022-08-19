@@ -249,7 +249,7 @@ class PHSMPage extends Component {
                             <TableCell>Measure</TableCell>
                             <TableCell>Status</TableCell>
                             {this.state.selected.includes("Linear Regression") && <TableCell>Without Measure (LR)</TableCell>}
-                            {this.state.selected.includes("Deep Neural Network") && <TableCell>Without Measure (DNNR)</TableCell>}
+                            {this.state.selected.includes("Deep Neural Network") && <TableCell><b>Without Measure (DNNR)</b></TableCell>}
                             {this.state.selected.includes("XGBoost") && <TableCell>Without Measure (XGBoost)</TableCell>}
                         </TableRow>
                         </TableHead>
@@ -264,7 +264,7 @@ class PHSMPage extends Component {
                             <TableCell>{row.phsm}</TableCell>
                             <TableCell>{row.status}</TableCell>
                             {this.state.selected.includes("Linear Regression") && <TableCell>{row.lr}</TableCell>}
-                            {this.state.selected.includes("Deep Neural Network") && <TableCell>{row.dnnr}</TableCell>}
+                            {this.state.selected.includes("Deep Neural Network") && <TableCell><b>{row.dnnr}</b></TableCell>}
                             {this.state.selected.includes("XGBoost") && <TableCell>{row.btr}</TableCell>}
                             </TableRow>
                         ))}
